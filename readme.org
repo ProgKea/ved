@@ -15,7 +15,6 @@
    input -> "Hello, world!"
    jump_word(input, cursor_position) = ["Hello", ",", "world", "!"]
    #+END_EXAMPLE
-
 2. recognizing at which word we're at using the cursor position
 
    The function should take the cursor position at check at which word we're at to know where the beginning of the next word will be.
@@ -29,7 +28,6 @@
              print(words[i-1])
              break
    #+END_SRC
-
    The output of this is =world=, assuming the cursor was already offset accordingly because of the whitespace that was removed.
 
 3. Moving the cursor to the next word
