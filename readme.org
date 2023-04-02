@@ -1,0 +1,5 @@
+* Ved
+
+** Notes
+
+#+INCLUDE: "./notes/notes.org"

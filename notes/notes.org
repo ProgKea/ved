@@ -1,0 +1,25 @@
+*** Word jumping
+
+1. splitting the input into words:
+
+   The first step should be splitting the input into words.
+   By word I mean strings split by whitespace and special characters like ",.:@()'".
+   Vim doesn't count the whitespace itself as words, so you can have alot of spaces between word and it will just jump to the first character of the next word.
+
+   Example:
+   #+BEGIN_EXAMPLE
+   input -> "Hello, world!"
+   jump_word(input, cursor_position) = ["Hello", ",", "world", "!"]
+   #+END_EXAMPLE
+
+2. recognizing at which word we're at using the cursor position
+
+   The function should take the cursor position at check at which word we're at to know where the beginning of the next word will be.
+   To find the nth word we're on we can use the following algorithm (The input is "Hello, world!"):
+   #+INCLUDE: "./word_jump.py" src python
+
+   The output of this is =world=, assuming the cursor was already offset accordingly because of the whitespace that was removed.
+
+3. Moving the cursor to the next word
+
+   To move the cursor to the next word we will use this algorithm:
