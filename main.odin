@@ -85,7 +85,14 @@ ved_get_highlight :: proc(v: Ved) -> string {
 }
 
 ved_exec :: proc(v: ^Ved cmd: string) {
+    skip := false
     for c, i in cmd {
+	// TODO: find a better way to do this
+	if skip {
+	    skip = false
+	    continue
+	}
+
 	switch c {
 	case 'v':
 	    v.highlight_start = uint(i)
@@ -103,8 +110,20 @@ ved_exec :: proc(v: ^Ved cmd: string) {
 	    v.cursor = 0
 	case '_':
 	    v.cursor = count_seq(v.input, ' ')
-	/* case 'w': */
-	/*     v.cursor += jump_word(v.input, v.cursor) */
+	case 'w':
+	    v.cursor = len_up_to(v.words, get_current_word(v.words, v.cursor)+1)
+	case 'f':
+	    v.cursor += cast(uint)strings.index_rune(v.input[v.cursor:], rune(cmd[i+1]))
+	    skip = true
+	case 't':
+	    v.cursor += cast(uint)strings.index_rune(v.input[v.cursor:], rune(cmd[i+1]))-1
+	    skip = true
+	case 'F':
+	    v.cursor -= cast(uint)max(strings.index_rune(strings.reverse(v.input[:v.cursor+1]), rune(cmd[i+1])), 0)
+	    skip = true
+	case 'T':
+	    v.cursor -= cast(uint)max(strings.index_rune(strings.reverse(v.input[:v.cursor+1]), rune(cmd[i+1]))-1, 0)
+	    skip = true
 	case:
 	    fmt.eprintln("ERROR: Unkown symbol: ", c)
 	}
@@ -114,13 +133,17 @@ ved_exec :: proc(v: ^Ved cmd: string) {
 main :: proc() {
     v := ved_init("Hello, ved test")
     defer ved_deinit(&v) // I dont know if this is needed
-    ved_exec(&v, "lllllllllll")
-    fmt.println(v.words[get_current_word(v.words, v.cursor)])
 
-    /* ved_exec(&v, "vw") */
-    /* fmt.println(ved_get_highlight(v)) */
-    /* words := split_words("Hello, World!") */
-    /* defer delete(words) */
+    ved_exec(&v, "Te")
+    fmt.println(ved_get_highlight(v))
 
-    /* fmt.println(words) */
+    when #config(TEST, false) {
+	test_ved(&v)
+
+	test_ved :: proc(v: ^Ved) {
+	    fmt.println("Testing Ved")
+	}
+    }
 }
+
+// TODO: Improve all of this code by using builtin idiomatic functions by looking at odin core lib
