@@ -68,6 +68,7 @@ ved_init :: proc(input: string) -> (v: Ved) {
 	input = input,
 	words = split_words(input),
 	cursor = 0,
+	highlight_start = 0,
     }
 }
 
