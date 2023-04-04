@@ -1,1 +1,33 @@
 * Ved
+
+Ved is a command line tool that helps you get the output you want.
+
+** Getting started
+
+To use the tool you have to install a [[https://odin-lang.org/][odin]] compiler to compile the program.
+#+BEGIN_SRC bash
+  $ git clone https://github.com/ProgKea/ved
+  $ odin build .
+#+END_SRC
+
+Then you can use the program to edit a stream similar to [[https://www.gnu.org/software/sed/][sed]].
+
+You can edit a file:
+#+BEGIN_SRC bash
+  $ ./<program> <command> <filepath>
+#+END_SRC
+
+Or edit stdin:
+#+BEGIN_SRC bash
+  $ echo -e 'Hello, World\nThis is a test' | ./<program> <command>
+#+END_SRC
+
+** Example
+
+Example getting content inside brackets:
+#+BEGIN_SRC bash
+  $ echo -e 'Hello, (this is important content)\n(This is also important content)' | ./<program> 'f(lvt)'
+#+END_SRC
+This will output everything inside the brackets.
+
+In vim you would do =vi(= this functionality is going to be implemented in the future.

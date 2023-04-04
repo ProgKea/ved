@@ -116,9 +116,11 @@ ved_exec :: proc(v: ^Ved cmd: string) {
 	case 'w':
 	    v.cursor = len_up_to(v.words, get_current_word(v.words, v.cursor)+1)
 	case 'e':
-	    unimplemented("e is unimplemented")
+	    fmt.eprintf("Command %s is unimplemented", rune(cmd[i]))
+	    os.exit(1)
 	case 'b':
-	    unimplemented("b is unimplemented")
+	    fmt.eprintf("Command %s is unimplemented", rune(cmd[i]))
+	    os.exit(1)
 	case 'f':
 	    v.cursor += cast(uint)max(strings.index_rune(v.input[v.cursor:], rune(cmd[i+1])), 0)
 	    skip = true
@@ -150,10 +152,6 @@ print_help :: proc(program_name: string) {
 }
 
 main :: proc() {
-    when #config(TEST, false) {
-	fmt.println(execute_ved("Hello, World", "ve"))
-    }
-
     args := os.args
 
     switch {
