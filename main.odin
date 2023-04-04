@@ -2,6 +2,9 @@ package main
 
 import "core:fmt"
 import "core:strings"
+import "core:os"
+import "core:bufio"
+import "core:io"
 
 Ved :: struct {
     highlight_start: uint,
@@ -95,7 +98,7 @@ ved_exec :: proc(v: ^Ved cmd: string) {
 
 	switch c {
 	case 'v':
-	    v.highlight_start = uint(i)
+	    v.highlight_start = uint(v.cursor)
 	case 'h':
 	    if v.cursor > 0 {
 		v.cursor -= 1
@@ -112,11 +115,15 @@ ved_exec :: proc(v: ^Ved cmd: string) {
 	    v.cursor = count_seq(v.input, ' ')
 	case 'w':
 	    v.cursor = len_up_to(v.words, get_current_word(v.words, v.cursor)+1)
+	case 'e':
+	    unimplemented("e is unimplemented")
+	case 'b':
+	    unimplemented("b is unimplemented")
 	case 'f':
-	    v.cursor += cast(uint)strings.index_rune(v.input[v.cursor:], rune(cmd[i+1]))
+	    v.cursor += cast(uint)max(strings.index_rune(v.input[v.cursor:], rune(cmd[i+1])), 0)
 	    skip = true
 	case 't':
-	    v.cursor += cast(uint)strings.index_rune(v.input[v.cursor:], rune(cmd[i+1]))-1
+	    v.cursor += cast(uint)max(strings.index_rune(v.input[v.cursor:], rune(cmd[i+1]))-1, 0)
 	    skip = true
 	case 'F':
 	    v.cursor -= cast(uint)max(strings.index_rune(strings.reverse(v.input[:v.cursor+1]), rune(cmd[i+1])), 0)
@@ -130,20 +137,57 @@ ved_exec :: proc(v: ^Ved cmd: string) {
     }
 }
 
-main :: proc() {
-    v := ved_init("Hello, ved test")
-    defer ved_deinit(&v) // I dont know if this is needed
+execute_ved :: proc(input: string, cmd: string) -> string {
+    v := ved_init(input)
+    defer ved_deinit(&v)
 
-    ved_exec(&v, "Te")
-    fmt.println(ved_get_highlight(v))
-
-    when #config(TEST, false) {
-	test_ved(&v)
-
-	test_ved :: proc(v: ^Ved) {
-	    fmt.println("Testing Ved")
-	}
-    }
+    ved_exec(&v, cmd)
+    return ved_get_highlight(v)
 }
 
-// TODO: Improve all of this code by using builtin idiomatic functions by looking at odin core lib
+print_help :: proc(program_name: string) {
+    fmt.printf("%s <command> <optional filepath>\n", program_name)
+}
+
+main :: proc() {
+    when #config(TEST, false) {
+	fmt.println(execute_ved("Hello, World", "ve"))
+    }
+
+    args := os.args
+
+    switch {
+    case len(args) < 2:
+	fmt.eprintln("ERROR: not enough arguments were provided.")
+	print_help(args[0])
+    case len(args) == 2:
+	stdin := os.stream_from_handle(os.stdin)
+
+	reader: bufio.Reader
+	bufio.reader_init(&reader, io.Reader{stdin})
+	defer bufio.reader_destroy(&reader)
+
+	cmd := args[1]
+	input: string
+	for err: io.Error; err == nil; input, err = bufio.reader_read_string(&reader, '\n') {
+	    input := strings.trim(input, "\n")
+	    fmt.println(execute_ved(input, cmd))
+	}
+    case len(args) == 3:
+	cmd := args[1]
+	file_name := args[2]
+	data, ok := os.read_entire_file(file_name)
+	if !ok {
+	    fmt.eprintf("ERROR: failed to read file: %s", file_name)
+	    os.exit(1)
+	}
+
+	using strings
+	for line in split_lines(string(data)) {
+	    fmt.println(execute_ved(line, cmd))
+	}
+    case:
+	fmt.eprintln("ERROR: To many arguments were provided.")
+	print_help(args[0])
+    }
+}
