@@ -1,6 +1,6 @@
 * Ved
 
-Ved is a command line tool that helps you get the output you want.
+Ved is a command line tool that helps you get the output you want using vim motions.
 
 ** Getting started
 
